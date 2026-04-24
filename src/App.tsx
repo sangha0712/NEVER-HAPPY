@@ -1,15 +1,34 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { BookOpen, Scroll, ChevronRight, X } from 'lucide-react';
+import { Scroll, ChevronRight, X, Image as ImageIcon } from 'lucide-react';
+
+const CHARACTERS = [
+  { id: 0, name: '세리아 (유년기/수녀복)' },
+  { id: 1, name: '세리아 (유년기/파자마)' },
+  { id: 2, name: '세리아 (유년기/외출복)' },
+  { id: 3, name: '세리아 (성년기/성녀복)' },
+  { id: 4, name: '세리아 (성년기/파자마)' },
+  { id: 5, name: '세리아 (성년기/외출복)' },
+];
+
+const EXPRESSIONS = [
+  "평상 시 대화", "미소", "장난, 엉뚱", "웃음, 신남, 활기", "볼 붉힘, 부끄러움", 
+  "극도의 부끄러움", "우울, 슬픔", "울음, 눈물", "삐짐", "격분, 화남", 
+  "진지, 결연", "놀람, 당황", "궁금, 의문, 의아", "피로, 졸림, 피곤", "걱정, 초조, 긴장", 
+  "경멸", "공포", "비웃음, 혐오", "트라우마, 후회", "체념, 멘탈 붕괴", 
+  "공허", "불신, 외면", "패닉, 정신 이상, 얀데레", "쓰다듬어짐", "뽀뽀(입술, 볼, 이마)", 
+  "성법의 가호", "식사", "손잡기", "손잡고 끄는 중", "필로우 토크"
+];
 
 export default function App() {
-  const [isReading, setIsReading] = useState(false);
+  const [currentView, setCurrentView] = useState<'landing' | 'reader' | 'gallery'>('landing');
   const [showWorldSetting, setShowWorldSetting] = useState(false);
+  const [selectedCharId, setSelectedCharId] = useState(0);
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-200 font-sans selection:bg-amber-900/50">
       <AnimatePresence mode="wait">
-        {!isReading ? (
+        {currentView === 'landing' && (
           <motion.div
             key="landing"
             initial={{ opacity: 0 }}
@@ -73,8 +92,8 @@ export default function App() {
             <div className="z-10 mt-16 w-full max-w-sm mx-auto flex flex-col items-center justify-center space-y-6">
               {/* Central Play Button Concept */}
               <button 
-                onClick={() => setIsReading(true)}
-                className="relative group flex items-center justify-center w-[110px] h-[110px] rounded-full border-[1.5px] border-dashed border-[#ab916b]/30 hover:border-[#ab916b]/70 transition-all duration-700"
+                onClick={() => setCurrentView('reader')}
+                className="relative group flex items-center justify-center w-[110px] h-[110px] rounded-full border-[1.5px] border-dashed border-[#ab916b]/30 hover:border-[#ab916b]/70 transition-all duration-700 focus:outline-none"
               >
                 {/* Inner solid ring */}
                 <div className="absolute inset-[8px] rounded-full border border-[#ab916b]/20 bg-[#0a0a0a]/40 backdrop-blur-[2px] group-hover:bg-[#ab916b]/15 transition-colors duration-500" />
@@ -87,8 +106,8 @@ export default function App() {
 
               {/* Text Button beneath */}
               <button
-                onClick={() => setIsReading(true)}
-                className="group relative px-16 py-4 bg-[#0a0a0a]/50 backdrop-blur-md border border-[#ab916b]/40 hover:border-[#ab916b]/80 hover:bg-[#0f0f0f]/80 transition-all duration-500 flex items-center justify-center"
+                onClick={() => setCurrentView('reader')}
+                className="group relative px-16 py-4 bg-[#0a0a0a]/50 backdrop-blur-md border border-[#ab916b]/40 hover:border-[#ab916b]/80 hover:bg-[#0f0f0f]/80 transition-all duration-500 flex items-center justify-center focus:outline-none"
               >
                 {/* Corner diamonds */}
                 <div className="absolute -left-[5px] top-1/2 -translate-y-1/2 w-[9px] h-[9px] bg-gradient-to-r from-[#d4ba94] to-[#ab916b] rotate-45 shadow-[0_0_8px_rgba(212,186,148,0.4)] transition-shadow" />
@@ -98,9 +117,19 @@ export default function App() {
                   웹툰 감상 시작
                 </span>
               </button>
+
+              <button
+                 onClick={() => setCurrentView('gallery')}
+                 className="mt-4 text-[#88959b] hover:text-[#d4ba94] transition-colors duration-300 flex items-center gap-2 text-sm tracking-widest font-serif border-b border-transparent hover:border-[#d4ba94]/50 pb-1"
+              >
+                 <ImageIcon className="w-4 h-4" />
+                 캐릭터 갤러리
+              </button>
             </div>
           </motion.div>
-        ) : (
+        )}
+        
+        {currentView === 'reader' && (
           <motion.div
             key="reader"
             initial={{ opacity: 0 }}
@@ -111,7 +140,7 @@ export default function App() {
             {/* Nav Bar */}
             <div className="sticky top-0 z-50 bg-[#0a0a0a]/90 backdrop-blur-md border-b border-white/5 py-4 px-6 flex justify-end items-center transition-transform">
               <button
-                onClick={() => setIsReading(false)}
+                onClick={() => setCurrentView('landing')}
                 className="text-sm text-slate-400 hover:text-white transition-colors flex items-center gap-1"
               >
                 메인으로 <X className="w-4 h-4" />
@@ -131,13 +160,82 @@ export default function App() {
                     src={url}
                     alt={`Webtoon panel ${idx + 1}`}
                     referrerPolicy="no-referrer"
-                    className="w-full h-auto object-cover block"
+                    className="w-full h-auto object-cover block bg-[#1a1a1a] min-h-[300px]"
+                    loading={idx === 0 ? "eager" : "lazy"}
                   />
                 </div>
               ))}
               <div className="mt-12 text-center text-[#ab916b]/80 font-serif border-t border-[#ab916b]/20 pt-8 pb-12 tracking-[0.5em] text-lg uppercase">
                 END
               </div>
+            </div>
+          </motion.div>
+        )}
+
+        {currentView === 'gallery' && (
+          <motion.div
+            key="gallery"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="min-h-screen bg-[#070b0c] pb-24"
+          >
+            {/* Nav Bar */}
+            <div className="sticky top-0 z-50 bg-[#070b0c]/90 backdrop-blur-md border-b border-[#ab916b]/10 py-5 px-6 flex flex-col md:flex-row gap-4 md:items-center justify-between">
+              <div className="flex gap-2 overflow-x-auto pb-2 md:pb-0 scrollbar-hide py-1">
+                {CHARACTERS.map((char) => (
+                  <button
+                    key={char.id}
+                    onClick={() => setSelectedCharId(char.id)}
+                    className={`whitespace-nowrap px-4 py-2 rounded-full text-xs font-serif transition-colors border ${
+                      selectedCharId === char.id
+                        ? 'border-[#ab916b] bg-[#ab916b]/10 text-[#d4ba94]'
+                        : 'border-white/5 text-slate-400 hover:text-slate-200 hover:border-white/20 hover:bg-white/5'
+                    }`}
+                  >
+                    {char.name}
+                  </button>
+                ))}
+              </div>
+              <button
+                onClick={() => setCurrentView('landing')}
+                className="shrink-0 text-sm text-slate-400 hover:text-white transition-colors flex items-center gap-1 self-end md:self-auto"
+              >
+                메인으로 <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Gallery Grid (Pre-rendered for zero-lag tab switching) */}
+            <div className="max-w-7xl mx-auto p-6 mt-4 relative min-h-[60vh]">
+              {CHARACTERS.map((char) => (
+                <div 
+                  key={char.id}
+                  className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 w-full"
+                  style={{ display: selectedCharId === char.id ? 'grid' : 'none' }}
+                >
+                  {EXPRESSIONS.map((expr, idx) => (
+                    <div 
+                      key={idx} 
+                      className="group flex flex-col bg-[#0a1215] border border-[#ab916b]/10 rounded overflow-hidden hover:border-[#ab916b]/40 transition-colors"
+                    >
+                      <div className="relative aspect-square overflow-hidden bg-[#111]">
+                        <img
+                          src={`https://igx.kr/r/6W/${char.id}/${idx}`}
+                          alt={expr}
+                          loading="eager"
+                          decoding="async"
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      </div>
+                      <div className="p-4 flex flex-col items-center justify-center text-center h-20">
+                        <span className="text-[10px] text-[#ab916b]/60 mb-1 font-mono">#{idx}</span>
+                        <span className="text-xs md:text-sm text-slate-300 font-serif leading-tight">{expr}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ))}
             </div>
           </motion.div>
         )}
